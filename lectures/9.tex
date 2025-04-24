@@ -1,8 +1,8 @@
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% SUMMARY    : Lecture 6
+% SUMMARY    : Lecture 9
 %            : University of Southern Maine 
 %            : @james.quinlan
-%            : Ellis Fitzgerald - Lecture 8
+%            : Ellis Fitzgerald
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 \section*{Objectives}
@@ -86,7 +86,7 @@ Similarly, there is another function known as the \textbf{Objective Function} wh
 \[ 
 \text{Objective Function}=\text{Cost} + \text{Regularizer}
 \]
-The purpose of the regularizer is to discourage large weights by adding a penalty term to the cost function. This helps prevent overfitting and improves generalization. Common regularizers include L1 (Lasso) and L2 (Ridge), which shrink model coefficients during training.
+The purpose of the regularizer is to discourage large weights by adding a penalty term to the cost function. This helps prevent overfitting and improves generalization. Common regularizers include L1 (Lasso) \cite{tibshirani1996lasso} and L2 (Ridge), which shrink model coefficients during training.
 
 \subsection{Gradient Descent}
 Gradient descent \cite{goodfellow2016deep} is essentially a use case for calculating derivatives. In supervised Machine Learning (ML) tasks, its purpose is to find global minimums (where the derivative is 0) to optimize a model's loss function. 
@@ -114,9 +114,9 @@ Gradient descent performance depends heavily on the learning rate, which determi
 % List of quick facts %
 \begin{outline}
     \1 Developed by \textbf{Rosenblatt} in \textbf{1957} at Cornell University
-    \1 It was the first AI algorithm
+    \1 It was the first "AI" algorithm
     \1 \textbf{Binary Classification} Task
-    \1 The goal is the find a hyperplane to separate the data
+    \1 The goal is to find \textit{a} hyperplane (seperating the data)
     \1 Assumes data is \textbf{Linearly Separable}
     \1 Calculates weight vector $\vec{w}$ and bias $b$ 
     \1 ``Bundle \& Save'': This trick will save time by removing the need to calculate $b$. We do this by ``bundling" $b$ into $\vec{w}$: 
@@ -143,9 +143,9 @@ Gradient descent performance depends heavily on the learning rate, which determi
 \begin{outline}
     \1 Stands for \textbf{$k$ Nearest Neighbors}
     \1 Loops over all neighbors and calculates distance
-    \1 Sorts distances and returns $k$ nearest
     \1 Assumes there is a pattern
     \1 Not designed for data with random values
+    \1 Sorts distances and returns $k$ nearest
     \1 \textbf{Regression:} Averages values to nearest neighbor values
     \1 \textbf{Classification:} Sets label to the mode of nearest neighbor values
 \end{outline}
@@ -175,5 +175,5 @@ end
     \1 What does SVM stand for? What is its purpose?
     \1 What is the definition of a distance function? Give examples.
 \end{outline}
+
 \bibliographystyle{plain}
-\bibliography{references}
