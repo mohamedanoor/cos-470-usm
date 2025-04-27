@@ -18,13 +18,13 @@
 
 \section*{Optimizers}
 
-\underline{Goal: } Find "test" = max, or min
+\underline{Goal: } Find "test" value: maximize or minimize
 
 \underline{Loss function: } minimize
 Two methods
 \begin{itemize}
     \item exact take derivative = 0
-    \item  Gradient based method
+    \item  Gradient-based method
 \end{itemize}
 
 
@@ -59,13 +59,13 @@ Two methods
 
 \end{tikzpicture}
 
-initial value = seed the generator
+Initial value = seed the generator
 
-\section{vanilla gradient descent}
+\section{Vanilla Gradient Descent}
 
-\underline{update function:} \boxed{w_{t+1}=w_{t}-\gamma \nabla L(W)} \\
+\underline{Update function:} \boxed{w_{t+1}=w_{t}-\gamma \nabla L(w_t)} \\
 L(W) is the loss function\\
-$\gamma$ is the learning rate, a hyperparameter tunable via cross validation\\ 
+$\gamma$ is the learning rate, a hyperparameter tunable via cross-validation\\ 
 
 
 
@@ -115,21 +115,21 @@ frequent issues:\\
 \begin{itemize}
     \item gets stuck at local minimum 
     \item vanishing gradient
-    \item if learning rate is increased can get unstuck but risk jumping over desired points if increased to much
+    \item If the learning rate is increased, it can get unstuck but risks jumping over desired points if increased too much
     
 \end{itemize}
 
 
-\section{momentum}
-\underline{intuitive: }$w_{t+1}=w_t-\gamma \nabla L)w_t+$ (past gradients)\\
-\underline{Actual: }\boxed{v_0=0}\\ \boxed{v_{t_1}=\xi v_t + \nabla L (w_t)}\\
-\boxed {w_{t_1}=w_t-\gamma v_{t+1}}\\
+\section{Momentum}
+\underline{Intuitive: } $w_{t+1}=w_t-\gamma \nabla L(w_t) + \text{(past gradients)}$\\
+\underline{Actual: }\boxed{v_0=0}\\ \boxed{v_{t+1}=\xi v_t + \nabla L(w_t)}
+\boxed{w_{t+1}=w_t-\gamma v_{t+1}}\\
 \underline{issue: } can move past desired point because of momentum of past gradients\\
 \underline{evaluating performance: } \fbox{Count number of iterations}\\
 
-\section{Gradient-based Nesterov}
+\section{Gradient-Based Nesterov}
 \boxed{v_0=0}\\
-\boxed{v_{t+1}=\xi v_t \nabla L (w_t)}\\
+\boxed{v_{t+1}=\xi v_t + \nabla L(w_t)}
 \boxed{w_{t+1}=w_t-\gamma (\delta v_{t+1} + \nabla L(w_t))}\\
 look ahead : $\delta v_{t+1}$
 
