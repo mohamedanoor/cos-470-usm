@@ -1,3 +1,4 @@
+
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % SUMMARY    : Support Vectors and Multi-variable Calculus 
 %            : University of Southern Maine 
@@ -208,3 +209,21 @@ Once we have calculated the gradient, we can use various gradient descent techni
     \item \textbf{RMSProp:} An adaptive learning rate algorithm that divides the gradient by an exponentially decaying average of squared gradients.
     \item \textbf{Adam (Adaptive Moments):} A combination of Momentum and RMSProp, incorporating both the first and second moments of the gradients.
 \end{itemize}
+
+\section{Summary and Key Takeaways}
+
+In this lecture, we've covered several fundamental aspects of Support Vector Machines:
+
+\begin{itemize}
+    \item \textbf{Margins}: Support vectors represent data points that maintain the maximum distance between the hyperplane and their location. The primary objective of SVMs is to maximize this separation margin.
+    
+    \item \textbf{Objective Function}: $\min \frac{1}{2} \|\mathbf{w}\|^2$ subject to $y_i(\mathbf{w}^T\mathbf{x}_i + b) \geq 1$ for all data points.
+    
+    \item \textbf{Support Vectors}: The critical data points that lie exactly on the margin and solely determine the decision boundary.
+    
+    \item \textbf{Lagrange Multipliers}: The optimization problem incorporates constraints through mathematical tools that define nonzero values only for support vectors.
+    
+    \item \textbf{Gradient Descent}: Various optimization techniques are used to find the optimal weight vector that maximizes the margin.
+\end{itemize}
+
+These concepts form the foundation of SVMs, illustrating how principles from multivariable calculus and optimization theory come together to create powerful machine learning algorithms.
