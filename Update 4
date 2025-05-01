@@ -1,0 +1,190 @@
+%+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+% SUMMARY    : KNN, Regression, Scale Data and Classifier Function 
+%            : University of Southern Maine 
+%            : @james.quinlan
+%            : Deiby Wu - Lecture 4 --> updated by Mohamed Noor
+%+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+\documentclass[12pt]{article}
+\usepackage{amsmath, amssymb}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{geometry}
+\usepackage{minted}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{cite}
+\geometry{margin=1in}
+
+\title{Lecture 4: KNN, Regression, Scaling, and Classifier Functions}
+\author{University of Southern Maine}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Objectives}
+\begin{outline}
+    \1 K-Nearest Neighbors (KNN)
+    \1 Regression
+    \1 Scale Data
+    \1 Outline for KNN Algorithm
+    \1 Classifier Function
+    \1 Class Code
+    \1 XPLs
+\end{outline}
+
+\rule[0.0051in]{\textwidth}{0.00025in}
+
+\section{K-Nearest Neighbors (KNN)\cite{guo2003knn}}
+
+\textbf{KNN} is an algorithm used for both regression and classification tasks. It classifies new data points by evaluating their proximity to labeled training data points.
+
+The dataset takes the form:
+\[
+D = \{(x_1, y_1), (x_2, y_2), \dots, (x_n, y_n)\}
+\]
+where \(x \in \mathbb{R}^p\)
+
+Each \((x, y)\) pair consists of a feature vector \(x\) and an associated label \(y\). For classification, \(y\) is a discrete class; for regression, \(y\) is a real-valued target.
+
+\section{Regression Case}
+
+\subsection{Example: Predicting House Prices}
+
+\[
+x = 
+\begin{bmatrix}
+    \text{Sq. ft} \\
+    \text{Dist to Ocean} \\
+    \text{Dist to School}
+\end{bmatrix}, \quad
+y = [325{,}000]
+\]
+
+Here, \(x\) consists of numerical features relevant to the house, and \(y\) is the price in dollars.
+
+\subsection{Use Case: Estimating Missing Temperature}
+
+Instead of using the national average, we can estimate a missing temperature for a city (e.g., in New Hampshire) by averaging the temperatures of its 3 geographically nearest neighbors.
+
+\subsection{Dot Product and Cross-Validation}
+
+The dot product is used in linear regression to make predictions:
+\[
+y_{\text{pred}} = w \cdot x = \sum_{i=0}^{2} w_i x_i
+\]
+
+Where \(w\) are learned weights and \(x\) the feature vector.
+
+\textbf{Cross-validation} helps ensure generalization:
+
+\begin{enumerate}
+    \item Split data into \(k\) folds.
+    \item Train on \(k-1\) folds and validate on the remaining fold.
+    \item Repeat \(k\) times.
+    \item Average the scores.
+\end{enumerate}
+
+\section{Preprocessing}
+
+\subsection{Scale Data}
+
+Feature scaling ensures consistent ranges for all features so that large-scale values don't dominate distance metrics.
+
+\subsection{Scaling Techniques}
+\begin{outline}
+    \1 \textbf{Standardize}
+
+    \[
+    x_i' = \frac{x_i - \bar{x}}{\sigma}
+    \]
+    where:
+    \begin{itemize}
+        \item \(x_i'\): standardized value
+        \item \(\bar{x}\): mean of the column
+        \item \(\sigma\): standard deviation
+    \end{itemize}
+
+    \1 \textbf{Normalize (Min-Max Scaling)}
+    
+    \[
+    x \rightarrow [0,1]
+    \]
+    
+    Mapping an interval \([2,10] \rightarrow [0,1]\), we scale intermediate values accordingly.
+\end{outline}
+
+\section{Outline for the KNN Algorithm}
+\begin{outline}
+    \1 Given data \(D = \{(x_i, y_i)\}\)
+    \1 Compute distance from test point \(x_t\) to each \(x_i\)
+    \1 Sort distances
+    \1 Select \(k\) nearest neighbors
+    \1 Predict using the mode (classification) or mean/median (regression) of neighbor labels
+\end{outline}
+
+\section{Classifier Function}
+
+\[
+h(x) = \arg\max_{j \in \{1,2,\dots,m\}} \sum_{i \in N_k} I_{cj}(y_i)
+\]
+
+Where:
+\[
+I_{cj}(y_i) = 
+\begin{cases}
+1 & y_i = c_j \\
+0 & y_i \neq c_j
+\end{cases}
+\]
+
+This function counts class votes among neighbors and returns the class with the highest count.
+
+\subsection{argmax and argmin}
+
+To find local extrema of a function \(f(x)\), solve:
+\[
+f'(x) = 0
+\]
+Then check second derivative or graph to determine whether it’s a minimum or maximum.
+
+\section{Class Code (Julia)}
+\begin{minted}[frame=lines, fontsize=\footnotesize]{julia}
+# Load and classify the Iris dataset using KNN
+
+using Pkg
+Pkg.add("RDatasets")
+Pkg.add("MLJBase")
+Pkg.add("Distances")
+
+using Distances
+using RDatasets
+
+# Load the dataset
+iris = dataset("datasets", "iris")
+
+# Extract features and labels
+X = Matrix(iris[:,1:4])
+y = iris.Species
+
+# Convert labels to binary: 1 for "setosa", -1 otherwise
+y = @. ifelse(iris.Species == "setosa", 1, -1)
+
+# Get unique labels and compute mode using argmax
+c = unique(y)
+mode_label = c[argmax(map(i -> sum(y .== c[i]), 1:lastindex(c)))]
+\end{minted}
+
+\section{Explorations}
+\begin{outline}
+    \1 Code the standardization formula
+    \1 Implement min-max scaling for \([2,10] \rightarrow [0,1]\)
+    \1 Write a linear transform for \([a,b] \rightarrow [c,d]\)
+\end{outline}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
