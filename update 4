@@ -1,0 +1,763 @@
+%+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+% SUMMARY    : KNN, Regression, Scale Data and Classifier Function 
+%            : University of Southern Maine 
+%            : @james.quinlan
+%            : Deiby Wu - Lecture 4 --> updated by Mohamed Noor
+%+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+\documentclass[12pt]{article}
+\usepackage{amsmath, amssymb}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{geometry}
+\usepackage{minted}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{xcolor}
+\geometry{margin=1in}
+
+% Define colors for consistency in figures
+\definecolor{pointcolor}{RGB}{0,0,0}
+\definecolor{highlightcolor}{RGB}{128,0,128}
+\definecolor{specialpoint}{RGB}{255,0,0}
+\definecolor{positiveclass}{RGB}{0,128,0}
+\definecolor{negativeclass}{RGB}{255,0,0}
+\begin{document}
+
+\section*{Objectives}
+\begin{outline}
+    \1 K-Nearest Neighbors (KNN)
+    \1 Regression
+    \1 Scale Data
+    \1 Outline for KNN algorithm
+    \1 Classifier Function
+    \1 Class Code
+    \1 XPLs
+\end{outline}
+
+\rule[0.0051in]{\textwidth}{0.00025in}
+% ----------------------------------------------------------------
+
+\section{K-Nearest Neighbors (KNN)\cite{guo2003knn}}
+
+\textbf{KNN} is an algorithm that can be used for both Regression and Classification tasks. Its function is to classify new data points
+by examining what is nearby them, as its name indicates.
+
+\textbf{Formal notation for KNN data:}\\
+$D = \{(x_1, y_1), (x_2, y_2), \dots, (x_n, y_n)\}$
+
+where:
+\begin{itemize}
+    \item $x_i \in \mathbb{R}^p$ represents a feature vector with $p$ dimensions
+    \item $y_i$ represents the target variable (class label or value)
+    \item $n$ is the total number of training examples
+\end{itemize}
+
+Each $(x_i, y_i)$ pair consists of:
+\begin{itemize}
+    \item $x_i$: the feature vector containing $p$ attributes
+    \item $y_i$: the label or target value
+\end{itemize}
+
+In the classification case, $y_i$ is a discrete label (such as a category or class), and in the regression case, $y_i$ is a real number.
+
+% -----------------------------------------------------------------------------------------------
+
+\section{Regression Case}
+
+\subsection{Example of feature representation for a regression case}
+
+\begin{center}
+    \textbf{Predicting House Prices}
+\end{center}
+
+\vspace{-0.5cm}
+
+\begin{align*}
+    x_i &= \begin{bmatrix}
+            \text{Sq. ft} \\
+            \text{Dist to Ocean} \\
+            \text{Dist to School} \\
+            \vdots \\
+         \end{bmatrix} \\\\\\
+    y_i &= \$325,000
+\end{align*}
+
+Here the input feature vector $x_i$ consists of multiple attributes related to the house,
+like the square feet, the distance to the ocean, and the distance to school. The target
+variable $y_i$ represents the price of the home in dollars.\\\\
+
+\subsection{Example of use case for regression case}
+
+For missing values of temperature for a particular city, instead of
+taking the average of every city in the country, we consider the average
+temperature of the 3 nearest cities. Let's say we are trying to find the temperature
+of a city in New Hampshire.
+
+\begin{center}
+    \begin{tikzpicture}
+        % Create a more recognizable outline of the United States
+        \draw[thick] plot[smooth cycle, tension=0.8] coordinates {
+            (-2,1) (-1.8,0.2) (-0.5,0) (0.7,-0.3) (2,-0.4) (3.2,-0.2) 
+            (4,0.5) (4.2,1.8) (3.5,2.8) (2.5,3) (1.5,3.2) (0,3) (-1,2)
+        };
+        
+        % Add recognizable coastlines
+        \draw[blue, thin] (-2,1) -- (-1.8,0.2) -- (-0.5,0) -- (0.7,-0.3) -- (2,-0.4) -- (3.2,-0.2) -- (4,0.5);
+        \draw[blue, thin] (-2,1) -- (-1,2) -- (0,3);
+        
+        % Label the map
+        \node at (1,-0.7) {\small United States};
+        
+        % Northeast region highlight
+        \draw[red, dashed] (3,2) circle (0.8);
+        \node at (3,2.8) {\small Northeast};
+        
+        % Mark New Hampshire specifically
+        \fill[red] (3.2, 2.2) circle (0.08) node[right] {\scriptsize NH};
+        
+        % Mark neighboring cities/states
+        \fill[blue] (3, 2.4) circle (0.07) node[left] {\scriptsize VT};
+        \fill[blue] (3.4, 2.0) circle (0.07) node[right] {\scriptsize ME};
+        \fill[blue] (3.1, 1.8) circle (0.07) node[below] {\scriptsize MA};
+    \end{tikzpicture}
+\end{center}
+
+In this map of the United States, we're trying to find the temperature of a city in New Hampshire (marked in red). The three blue dots represent cities in Vermont, Maine, and Massachusetts - the neighboring states to New Hampshire. Using the KNN approach, we would take the temperature of those 3 nearest cities and average them to estimate the missing temperature for the New Hampshire city. This approach is much more accurate than using the average temperature of all cities across the entire country.
+
+\subsection{Dot Product and Cross-Validation in Regression}
+
+\begin{center}
+    \textbf{Understanding Dot Product and Cross-Validation for House Price Prediction}
+\end{center}
+
+\vspace{-0.5cm}
+
+The dot product is a fundamental operation in linear regression, where the input feature vector \( x \) is multiplied by the learned weight vector \( w \) to predict the target \( y \). Mathematically, this can be written as:
+
+\begin{align*}
+    x &= \begin{bmatrix}
+            x_0 \\ x_1 \\ x_2
+         \end{bmatrix} =
+         \begin{bmatrix}
+            \text{Sq. ft} \\
+            \text{Dist to Ocean} \\
+            \text{Dist to School}
+         \end{bmatrix}, \quad
+    w = \begin{bmatrix}
+            w_0 \\ w_1 \\ w_2
+         \end{bmatrix}
+\end{align*}
+
+The predicted house price is computed using the dot product:
+
+\begin{align*}
+    y_{\text{pred}} &= w \cdot x \\
+    &= \sum_{i=0}^{2} w_i x_i \\
+    &= w_0 \cdot x_0 + w_1 \cdot x_1 + w_2 \cdot x_2
+\end{align*}
+
+where:
+\begin{itemize}
+    \item \( w_0, w_1, w_2 \) are the learned weights that determine the importance of each feature
+    \item \( y_{\text{pred}} \) is the predicted house price
+    \item The operation essentially performs a \textbf{weighted sum of the input features}
+\end{itemize}
+
+\begin{center}
+\resizebox{!}{5cm}{ % Adjust height, width auto-scales
+    \begin{tikzpicture}
+        % Input nodes (features)
+        \node[circle, fill=blue!50, inner sep=6pt, label=left:{$x_0 = \text{Sq. ft}$}] (x0) at (0,6) {};
+        \node[circle, fill=blue!50, inner sep=6pt, label=left:{$x_1 = \text{Dist to Ocean}$}] (x1) at (0,4) {};
+        \node[circle, fill=blue!50, inner sep=6pt, label=left:{$x_2 = \text{Dist to School}$}] (x2) at (0,2) {};
+
+        % Output node (prediction)
+        \node[circle, fill=blue!50, inner sep=8pt, label=right:{$y_{\text{pred}}$}] (output) at (6,4) {};
+
+        % Weights and connections
+        \draw[thick, ->] (x0) -- node[midway, above, sloped] {\(w_0\)} (output);
+        \draw[thick, ->] (x1) -- node[midway, above, sloped] {\(w_1\)} (output);
+        \draw[thick, ->] (x2) -- node[midway, above, sloped] {\(w_2\)} (output);
+
+    \end{tikzpicture}
+}
+\end{center}
+
+
+\textbf{Cross-Validation for Model Generalization}
+
+To ensure that our model generalizes well to unseen data, we use \textbf{k-fold cross-validation}, which consists of the following steps:
+
+\begin{enumerate}
+    \item Split the dataset into \( k \) subsets (folds).
+    \item Train the model on \( k-1 \) folds while leaving one fold for validation.
+    \item Repeat this process \( k \) times, using a different fold for validation each time.
+    \item Average the performance across all \( k \) runs to obtain a reliable estimate of model accuracy.
+\end{enumerate}
+
+% -----------------------------------------------------------------------------------------------
+
+\section{Preprocessing} 
+
+\subsection{Scale Data}
+Scaling data is important in machine learning algorithms to maintain consistency.
+Some features might have large values while others have small, meaning that models will
+be more biased towards the larger values. So, when they are in the same range, it is easier for
+models to compare the data impact on the result. For example, when dealing with the distance metric of 
+1000 miles compared to 50 feet, the 1000 miles will completely dominate the distance calculation; therefore, it
+is always necessary to scale this type of data.
+
+\subsection{Scaling Techniques}
+\begin{outline}[enumerate]
+\1 \textbf{Standardize (Z-score normalization)}
+
+\[
+x_i^{\prime} = \frac{x_i - \mu}{\sigma} = Z
+\]
+
+Where:
+\begin{itemize}
+    \item $x_i^{\prime}$: the new standardized data point  
+    \item $x_i$: the original data point  
+    \item $\mu$: the mean of the feature (average of entire column of values)
+    \item $\sigma$: the standard deviation of the feature
+    \item $Z$: the resulting Z-score (number of standard deviations from the mean)
+\end{itemize}
+
+For each feature in our dataset represented as a vector:
+
+\begin{align*}
+X_j &= \begin{bmatrix}
+        x_{1j} \\
+        x_{2j} \\
+        x_{3j} \\
+        \vdots \\
+        x_{nj}
+        \end{bmatrix} \\
+\end{align*}
+
+The standardization process subtracts the mean $\mu_j$ of the entire column from each value $x_{ij}$, and divides that difference by the standard deviation $\sigma_j$ to get the Z-score. This transforms the data to have a mean of 0 and a standard deviation of 1.
+
+
+\1 \textbf{Normalize (Min-Max Scaling)}
+
+For this scaling technique, we transform the values of feature $X_j$ to fit within the interval from $0$ to $1$:
+
+\[
+    x_{ij}^{\prime} = \frac{x_{ij} - \min(X_j)}{\max(X_j) - \min(X_j)}
+\] 
+
+This maps all values in the range $[\min(X_j), \max(X_j)]$ to the range $[0,1]$.
+
+For example, if we have values ranging from $2$ to $10$, then we map $2$ to $0$, and $10$ to $1$:
+
+\[
+    [2,10] \rightarrow [0,1]
+\] 
+
+\begin{center}
+    \begin{tikzpicture}
+        % Setup the structure with clearer labels
+        \draw[->, thick] (-1, 0) -- (6, 0) node[right] {Original scale};
+        \draw[->, thick] (0, -1) -- (0, 6) node[above] {Normalized scale};
+
+        % Fill up with a lighter grid
+        \draw[gray!30, dotted] (-1, -1) grid (6, 6);
+
+        % Draw the lines that connect [2,10] to [0,1] with clearer labeling
+        \draw[thick] (1,0) -- (1,1) -- (0,1);
+        \draw[thick] (5,0) -- (5,5) -- (0,5);
+        
+        % Add clear mapping arrows
+        \draw[->, blue] (1,0.3) to[bend left] (0.3,1);
+        \draw[->, blue] (5,0.3) to[bend left] (0.3,5);
+
+        % Draw dotted lines in between the range of [2,10] to [0,1]
+        \draw[dashed] (2,0) -- (2,2) -- (0,2);
+        \draw[dashed] (2.5,0) -- (2.5,2.5) -- (0,2.5);
+        \draw[dashed] (3.4,0) -- (3.4,3.4) -- (0,3.4);
+        \draw[dashed] (4.5,0) -- (4.5,4.5) -- (0,4.5);
+
+        % Label the coordinates more clearly
+        \node[below] at (1, 0) {\textbf{2 (min)}};
+        \node[below] at (5, 0) {\textbf{10 (max)}};
+        \node[left] at (0, 1) {\textbf{0}};
+        \node[left] at (0, 5) {\textbf{1}};
+        
+        % Add a title
+        \node[align=center] at (2.5, 6.5) {Min-Max Scaling Visualization};
+        
+        % Explain point mapping with an example
+        \node[circle, fill=red] at (3.4, 3.4) {};
+        \node[below right] at (3.4, 3.4) {$x = 6.8$};
+        \node[left] at (0, 3.4) {$x' = 0.6$};
+    \end{tikzpicture} \\
+\end{center}
+
+As shown in the graph, we mapped $2$ to $0$, and $10$ to $1$ (solid lines), while the dashed lines represent intermediate values. For example, a value of $6.8$ in the original range would map to $0.6$ in the normalized range.
+
+\end{outline}
+
+% -----------------------------------------------------------------------------------------------
+
+\section{Outline for the KNN algorithm}
+\begin{outline}
+
+    \1  Given a training dataset: $D=\{(x_i,y_i)\}_{i=1}^{n}$ where $x_i \in \mathbb{R}^p$ and $y_i$ is either a class label or a real value
+
+    \1  For a new test point $x_t$ (not in set $D$), compute the distance from $x_t$ to every training point $x_i$:
+        \begin{itemize}
+            \item Typically using Euclidean distance: $d(x_t, x_i) = \sqrt{\sum_{j=1}^{p} (x_{tj} - x_{ij})^2}$
+            \item Or Manhattan distance: $d(x_t, x_i) = \sum_{j=1}^{p} |x_{tj} - x_{ij}|$
+        \end{itemize}
+
+    \1  Sort all distances in ascending order: $d(x_t, x_{(1)}) \leq d(x_t, x_{(2)}) \leq \ldots \leq d(x_t, x_{(n)})$
+
+    \1  Select the first $K$ training points with the smallest distances to form the set $N_K(x_t)$
+
+    \1  Make a prediction based on these $K$ nearest neighbors:
+        \begin{itemize}
+            \item For \textbf{Classification}: Take the mode (most frequent class) among $\{y_{(1)}, y_{(2)}, \ldots, y_{(K)}\}$
+            \item For \textbf{Regression}: Take the mean of $\{y_{(1)}, y_{(2)}, \ldots, y_{(K)}\}$, or the median to reduce the impact of outliers
+        \end{itemize}
+
+\end{outline}
+
+Let's clarify the notation:
+\begin{itemize}
+    \item $x_t$ is a test point we want to classify or predict
+    \item $N_K(x_t)$ is the subset of $K$ training points closest to $x_t$
+    \item $|N_K(x_t)| = K$, where $|N_K(x_t)|$ represents the number of elements in that subset
+\end{itemize}
+
+For any training point $(x^{\prime},y^{\prime}) \in D \setminus N_K(x_t)$ that is not in the $K$ nearest neighbors, the distance from the test point to this point must be greater than or equal to the maximum distance to any point in the $K$ nearest neighbors:
+
+\[
+    d(x_t, x^{\prime}) \geq \max_{(x^{\prime\prime},y^{\prime\prime}) \in N_K(x_t)} d(x_t, x^{\prime\prime})
+\]
+
+\begin{center}
+    \begin{tikzpicture}
+        % Outer circle - entire dataset
+        \draw[thick, scale=1.3] plot[smooth cycle, tension=0.9] coordinates {
+            (0,0) (2.4,0.4) (3.6,1.2) (4,2.8) (3,4) (1.2,4.6) 
+            (0,4) (-1.4,3) (-2,1.6) (-1,0.4)
+        };
+
+        % Label for Outer circle
+        \node at (-0.3,5.5) {\textbf{Dataset D}};
+
+        % Random points in dataset
+        \foreach \i in {1,...,65} {
+            \fill[black, opacity=0.3] 
+            ({1.3 + 2.4*rand}, {2.8 + 2.16*rand}) circle (0.08);
+        }
+
+        % Inner circle - points not in K nearest neighbors
+        \begin{scope}[shift={(1.8,1.9)}, scale=1.3]
+            \draw[thick] plot[smooth cycle, tension=0.9] coordinates {
+                (0,0) (1.2,0.2) (1.8,0.6) (2,1.4) (1.5,2) (0.8,2.3) 
+                (0,2) (-0.7,1.5) (-1,0.8) (-0.5,0.2)
+            };
+        \end{scope}
+
+        % Label for Inner circle
+        \node at (0.5,4.6) {\textbf{D $\setminus$ $N_K(x_t)$}};
+
+        % Circle for K nearest neighbors
+        \begin{scope}[shift={(2.7,2.5)}, scale=0.6]
+            \draw[red, thick] plot[smooth cycle, tension=0.9] coordinates {
+                (0,0) (1.2,0.2) (1.8,0.6) (2,1.4) (1.5,2) (0.8,2.3) 
+                (0,2) (-0.7,1.5) (-1,0.8) (-0.5,0.2)
+            };
+        \end{scope}
+            
+        % Label for K nearest neighbors
+        \node at (2.5,4) {\textbf{$N_K(x_t)$}};
+
+        % Test point
+        \fill[purple] (2.8, 3.2) circle (0.12) node[below right] {$x_t$};
+        
+        % K=3 neighbor points
+        \fill[blue] (2.6, 3.3) circle (0.1) node[left] {$x_{(1)}$};
+        \fill[blue] (3.0, 3.6) circle (0.1) node[above] {$x_{(2)}$};
+        \fill[blue] (3.1, 2.9) circle (0.1) node[right] {$x_{(3)}$};
+        
+        % Draw radius showing max distance
+        \draw[red, dashed] (2.8, 3.2) circle (0.6);
+
+    \end{tikzpicture}
+\end{center}
+
+The diagram above illustrates the KNN concept:
+\begin{itemize}
+    \item The purple point ($x_t$) is our test point that we want to classify
+    \item The three blue points represent the $K=3$ nearest neighbors to $x_t$
+    \item The red dashed circle shows the maximum distance from $x_t$ to any of its $K$ nearest neighbors
+    \item Any point outside this circle is not among the $K$ nearest neighbors
+    \item The prediction for $x_t$ is based only on these $K=3$ nearest points
+\end{itemize}
+
+% -----------------------------------------------------------------------------------------------
+
+\section{Classifier Function}
+
+\[
+    h(x_t) = \operatorname*{argmax}_{j \in \{1,2,\ldots,m\}} \sum_{i \in N_K(x_t)} I_{c_j}(y_i)
+\]
+
+Where:
+\begin{itemize}
+    \item $h(x_t)$ is the predicted class for test point $x_t$
+    \item $\{1,2,\ldots,m\}$ represents all possible class labels
+    \item $N_K(x_t)$ is the set of $K$ nearest neighbors to $x_t$
+    \item $I_{c_j}(y_i)$ is the indicator function defined below
+\end{itemize}
+
+This function is also known as the \textbf{mode function}, which finds the class that appears most frequently among the $K$ nearest neighbors.
+
+The indicator function $I_{c_j}(y_i)$ is defined as:
+
+\[
+I_{c_j} (y_i) = 
+\begin{cases}
+    1 & \text{if } y_i = c_j \text{ (the neighbor has class } c_j\text{)}\\
+    0 & \text{if } y_i \neq c_j \text{ (the neighbor has a different class)}
+\end{cases}
+\]
+
+This indicator function returns 1 if the class of neighbor $i$ matches class $j$, and 0 otherwise. The classifier function sums these indicators for each class and selects the class with the maximum count.
+
+\subsection{argmax and argmin}
+
+\begin{center}
+    \begin{tikzpicture}
+        % Setup the structure
+        \draw[->, thick] (-1, 0) -- (8.5, 0) node[right] {$x$};
+        \draw[->, thick] (0, -2) -- (0, 7.5) node[above] {$f(x)$};
+
+        % Random curves
+        \draw[domain=0:8, smooth, variable=\x, thick, blue] 
+            plot ({\x}, {4 - 2*cos(deg(\x - 2)) + sin(deg(3*\x)) + 0.5*sin(deg(4*\x))});
+
+        % Critical points
+        \draw[dashed, red] (0.34,0) -- (0.34,5.55);
+        \fill[red] (0.34,5.55) circle (0.1);
+        \node[below] at (0.34, 0) {$x_1$};
+
+        \draw[dashed, red] (1.47,0) -- (1.47,1.2);
+        \fill[red] (1.47,1.2) circle (0.1);
+        \node[below] at (1.47, 0) {$x_2$};
+
+        \draw[dashed, red] (2.4,0) -- (2.4,2.9);
+        \fill[red] (2.4,2.9) circle (0.1);
+        \node[below] at (2.4, 0) {$x_3$};
+
+        \draw[dashed, red] (4.94,0) -- (4.94,7.1);
+        \fill[red] (4.94,7.1) circle (0.1);
+        \node[below] at (4.94, 0) {$x_4$};
+
+        \draw[dashed, red] (5.94,0) -- (5.94,4.1);
+        \fill[red] (5.94,4.1) circle (0.1);
+        \node[below] at (5.94, 0) {$x_5$};
+
+        \draw[dashed, red] (6.64,0) -- (6.64,5.5);
+        \fill[red] (6.64,5.5) circle (0.1);
+        \node[below] at (6.64, 0) {$x_6$};
+
+        \draw[dashed, red] (7.73,0) -- (7.73,1.2);
+        \fill[red] (7.73,1.2) circle (0.1);
+        \node[below] at (7.73, 0) {$x_7$};
+        
+        % Label the plot
+        \node[align=center] at (4, 8) {Function $f(x)$ with Critical Points};
+
+    \end{tikzpicture} \\
+\end{center}
+
+Given a function $f(x)$, to find the minimum and maximum values:
+\begin{itemize}
+    \item Take the derivative of the function and set it to zero: $f^{\prime}(x) = 0$
+    \item This identifies critical points where the function could have local minima or maxima
+    \item The \textbf{argmax} of $f(x)$ is the value of $x$ that produces the maximum output value
+    \item The \textbf{argmin} of $f(x)$ is the value of $x$ that produces the minimum output value
+\end{itemize}
+
+In the graph above, $x_4$ is the \textbf{argmax} because $f(x_4)$ is the highest value of the function. Similarly, $x_2$ is the \textbf{argmin} because $f(x_2)$ is the lowest value.
+
+\begin{center}
+    \begin{tikzpicture}
+        % Setup the structure
+        \draw[->, thick] (-1, 0) -- (7.5, 0) node[right] {$x$};
+        \draw[->, thick] (0, -1) -- (0, 7.5) node[above] {$f(x)$};
+
+        % Plot curve
+        \draw[domain=0:7, smooth, variable=\x, thick, blue] 
+            plot ({\x}, {2*sin(deg(\x)) + 4});
+
+        % Argmax
+        \draw[dashed, red] (1.57,0) -- (1.57,6);
+        \fill[red] (1.57,6) circle (0.1);
+        \node[below] at (1.57, 0) {$\text{argmax}$};
+        \node[right] at (1.57, 6) {$\max f(x) = 6$};
+
+        % Argmin
+        \draw[dashed, purple] (4.71,0) -- (4.71,2);
+        \fill[purple] (4.71,2) circle (0.1);
+        \node[below] at (4.71, 0) {$\text{argmin}$};
+        \node[right] at (4.71, 2) {$\min f(x) = 2$};
+        
+        % Title
+        \node[align=center] at (3.5, 8) {Visualization of argmax and argmin};
+
+    \end{tikzpicture} \\
+\end{center}
+
+This second graph clearly shows that the argmax is the input value ($x$) that produces the maximum output, and argmin is the input value that produces the minimum output.
+
+\subsection{Example of mode function}
+
+Let's say we have a new data point (the red dot below), and we want to classify it using KNN with K=3:
+
+\begin{center}
+    \begin{tikzpicture}
+        % Main area
+        \draw[thick, scale=1.3] plot[smooth cycle, tension=0.9] coordinates {
+            (0,0) (2.4,0.4) (3.6,1.2) (4,2.8) (3,4) 
+            (0,4) (-1.4,3) (-2,1.6) 
+        };
+
+        % Test point
+        \fill[red] (2.5,2.8) circle (0.1) node[right] {Test point $x_t$};
+        
+        % Draw a circle around K=3 nearest neighbors
+        \draw[red, dashed] (2.5,2.8) circle (0.8);
+
+        % K nearest neighbors with class labels
+        \node at (2.3, 3.4) {$y_7 = 1$};
+        \node at (1.8, 2.8) {$y_2 = 0$};
+        \node at (2.5, 2.1) {$y_5 = 1$};
+        
+        % Other points
+        \node at (-0.3,3) {$y_1 = 0$};
+        \node at (-0.7,4) {$y_3 = 1$};
+        \node at (-1,2.5) {$y_4 = 0$};
+        \node at (4.6,4.3) {$y_8 = 1$};
+        \node at (1,1) {$y_6 = 0$};
+        \node at (3,1) {$y_9 = 1$};
+
+    \end{tikzpicture}
+\end{center}
+
+We identify the K=3 nearest neighbors to our test point $x_t$:
+\begin{itemize}
+    \item $y_2 = 0$ (class 0)
+    \item $y_5 = 1$ (class 1)
+    \item $y_7 = 1$ (class 1)
+\end{itemize}
+
+Applying the mode function:
+\begin{align*}
+h(x_t) &= \operatorname*{argmax}_{j \in \{0,1\}} \sum_{i \in \{2,5,7\}} I_{c_j}(y_i) \\
+\text{For class 0:} &\sum I_{c_0}(y_i) = I_{c_0}(y_2) + I_{c_0}(y_5) + I_{c_0}(y_7) = 1 + 0 + 0 = 1 \\
+\text{For class 1:} &\sum I_{c_1}(y_i) = I_{c_1}(y_2) + I_{c_1}(y_5) + I_{c_1}(y_7) = 0 + 1 + 1 = 2
+\end{align*}
+
+Since the sum for class 1 (which equals 2) is greater than the sum for class 0 (which equals a 1), the argmax is class 1, and therefore the test point $x_t$ is classified as class 1.
+
+Note: When dealing with binary classification (only two classes), we should choose $K$ to be an odd number (like 3, 5, or 7) to avoid ties. When dealing with multiple classes, we should avoid choosing $K$ to be a multiple of the number of classes for the same reason.
+
+% -----------------------------------------------------------------------------------------------
+\section{Class Code}
+Language: Julia
+
+Below is a Julia implementation of KNN for classification using the Iris dataset. Each code block is annotated with comments to explain what's happening:
+
+\begin{minted}[frame=lines, framesep=2mm]{julia}
+# Step 1: Install and load necessary packages
+# ------------------------------------------------------
+# RDatasets: Contains common datasets including Iris
+# MLJBase: Provides machine learning functionality
+# Distances: Implements various distance metrics for KNN
+using Pkg
+Pkg.add("RDatasets")
+Pkg.add("MLJBase")
+Pkg.add("Distances")
+
+# Import the required packages
+using Distances # For calculating distances between points
+using RDatasets # For loading the Iris dataset
+\end{minted}
+
+\begin{minted}[frame=lines, framesep=2mm]{julia}
+# Step 2: Load and prepare the Iris dataset
+# ------------------------------------------------------
+# The Iris dataset is a classic dataset with 3 species of iris flowers
+# and 4 features: sepal length, sepal width, petal length, petal width
+iris = dataset("datasets", "iris")
+
+# Extract features (first 4 columns) as a matrix
+# The Matrix() function converts the DataFrame columns to a numerical matrix
+X = Matrix(iris[:,1:4])
+
+# Extract the target variable (species)
+y = iris.Species
+
+# Convert the target variable into binary labels:  
+# Here we're creating a simple binary classification problem
+# where we predict if a flower is "setosa" (1) or not (-1)
+y = @. ifelse(iris.Species == "setosa", 1, -1)
+
+# Get the unique class labels in the target variable
+# This will return [1, -1] for our binary problem
+c = unique(y)
+\end{minted}
+
+\begin{minted}[frame=lines, framesep=2mm]{julia}
+# Step 3: Implement the mode function for KNN classification
+# ------------------------------------------------------
+# This is the implementation of our classifier function h(x)
+# It finds the most common class among the k nearest neighbors
+
+# Find the mode (most frequent class) in the target variable y
+# 1. For each unique class i in c
+# 2. Count how many times it appears in y
+# 3. Return the class with the maximum count
+most_frequent_class = c[argmax(map(i -> sum(y .== c[i]), 1:lastindex(c)))]
+
+# Let's break down this line:
+# 1. map(i -> sum(y .== c[i]), 1:lastindex(c))
+#    - For each class index i
+#    - Count occurrences where y equals c[i]
+#    - This creates an array of counts for each class
+# 
+# 2. argmax(...) 
+#    - Finds the index of the maximum value in the counts
+#    - This gives us the index of the most frequent class
+#
+# 3. c[...]
+#    - Returns the actual class label
+\end{minted}
+
+\begin{minted}[frame=lines, framesep=2mm]{julia}
+# Step 4: Building a complete KNN implementation (additional code)
+# ------------------------------------------------------
+# This is how we would implement the full KNN algorithm
+
+function knn_classify(X_train, y_train, x_test, k)
+    # Calculate distances from test point to all training points
+    distances = [Euclidean()(x_test, X_train[i,:]) for i in 1:size(X_train,1)]
+    
+    # Find indices of k nearest neighbors
+    sorted_indices = sortperm(distances)
+    k_nearest_indices = sorted_indices[1:k]
+    
+    # Get labels of k nearest neighbors
+    k_nearest_labels = y_train[k_nearest_indices]
+    
+    # Find most frequent class in k nearest labels
+    classes = unique(k_nearest_labels)
+    class_counts = [sum(k_nearest_labels .== c) for c in classes]
+    
+    # Return class with highest count
+    return classes[argmax(class_counts)]
+end
+
+# Example usage:
+# Split data into train and test sets
+# train_indices = 1:100
+# test_indices = 101:150
+# X_train, y_train = X[train_indices,:], y[train_indices]
+# X_test, y_test = X[test_indices,:], y[test_indices]
+# 
+# # Predict first test example with k=3
+# prediction = knn_classify(X_train, y_train, X_test[1,:], 3)
+\end{minted}
+
+\section{Explorations}
+\begin{outline}
+    \1  Code the Standardize Scaler formula. \\
+    
+    \begin{minted}[frame=lines, framesep=2mm]{julia}
+    # Implement the standardization (Z-score) formula
+    function standardize(X)
+        # Calculate mean and standard deviation for each column (feature)
+        means = mean(X, dims=1)
+        stds = std(X, dims=1)
+        
+        # Apply the standardization formula: (x - μ) / σ
+        X_standardized = (X .- means) ./ stds
+        
+        return X_standardized
+    end
+    
+    # Example usage:
+    # X_std = standardize(X)
+    \end{minted}
+    
+    \1  Write down the formula for linear transformation, and then code it. e.g.$[2,10]$ $\rightarrow$ $[0,1]$ and anything in between.\\
+    
+    \textbf{Formula for linear transformation from range $[a,b]$ to $[c,d]$:}
+    \[
+    x' = c + \frac{(d-c)(x-a)}{b-a}
+    \]
+    
+    \begin{minted}[frame=lines, framesep=2mm]{julia}
+    # Implement the min-max scaling formula to map range [a,b] to [c,d]
+    function min_max_scale(X, a, b, c, d)
+        # If a and b are not provided, use the min and max of the data
+        if isnothing(a) || isnothing(b)
+            a = minimum(X, dims=1)
+            b = maximum(X, dims=1)
+        end
+        
+        # Apply the linear transformation formula
+        X_scaled = c .+ ((d-c).*(X.-a))./(b.-a)
+        
+        return X_scaled
+    end
+    
+    # Example: Scaling the column of a dataset from [2,10] to [0,1]
+    # X_scaled = min_max_scale(X, 2, 10, 0, 1)
+    \end{minted}
+    
+    \1 Write a linear transformation that maps $[a,b]$ to $[c,d]$ (draw a line for them). \\
+    
+    \begin{center}
+        \begin{tikzpicture}
+            % Setup the structure
+            \draw[->, thick] (-1, 0) -- (6, 0) node[right] {Original range $[a,b]$};
+            \draw[->, thick] (0, -1) -- (0, 6) node[above] {New range $[c,d]$};
+    
+            % Grid
+            \draw[gray!30, dotted] (-1, -1) grid (6, 6);
+    
+            % Plot transformation line
+            \draw[thick, blue] (1,1) -- (5,5);
+            
+            % Add labels
+            \node[below] at (1, 0) {$a$};
+            \node[below] at (5, 0) {$b$};
+            \node[left] at (0, 1) {$c$};
+            \node[left] at (0, 5) {$d$};
+            
+            % Add point mapping examples
+            \fill[red] (2, 2) circle (0.1);
+            \fill[red] (3, 3) circle (0.1);
+            \fill[red] (4, 4) circle (0.1);
+            
+            % Add formula
+            \node[align=center] at (3, 6.5) {$x' = c + \frac{(d-c)(x-a)}{b-a}$};
+            
+            % Example calculation
+            \draw[dashed, green] (3,0) -- (3,3) -- (0,3);
+            \node[right] at (3, 3.3) {$x' = 1 + \frac{(5-1)(3-1)}{5-1} = 3$};
+        \end{tikzpicture}
+    \end{center}
+    
+\end{outline}
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}
