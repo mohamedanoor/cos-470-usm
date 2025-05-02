@@ -68,8 +68,19 @@ Consider the following:
 % ----------------------------------------------------------------
 \section{More about kNN \cite{guo2003knn}}
 
-$\arg\max\sum_{i \in n_k}^{}\mathcal{I}c_j(y_i)$ $j={1,2,...m}$ \\
-suppose $j=2$ and $k=8$, it is binary classification, $N_k=$ set of indicies of the KNN \\
+\begin{equation}
+    \arg\max_{j=1,2,\ldots,m} \sum_{i \in N_k} I(c_j(y_i))
+\end{equation}
+where:
+\begin{outline}
+    \1 $j$ indexes the classes,
+    \1 $k$ is the number of neighbors,
+    \1 $N_k$ is the set of indices of the $k$ nearest neighbors,
+    \1 $I(\cdot)$ is the indicator function.
+\end{outline}
+
+Suppose $j=2$, $k=8$, and it is a binary classification problem.
+ 
 
 Example problem: \\
 $y=[1,-1,-1, \ 1, \ 1, \ 1,-1, \ 1]$ \\

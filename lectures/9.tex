@@ -17,7 +17,7 @@
 % ----------------------------------------------------------------
 
 \section{Regression}
-The previous lectures and materials have mostly covered classification tasks. As we know, classification can be binary, where there are two (2) labels: 
+The previous lectures and materials have mostly covered classification tasks. In general the goal or regression is to predict the labels.  As we know, classification can be binary, where there are two (2) labels: 
 \[
 y \in \{-1, 1\}
 \]
@@ -26,7 +26,7 @@ Though, classification tasks can contain $x\mathbb{\in Z^+}$ labels. In a small 
 \[
 y \in \{1, 2, 3\}
 \]
-\textbf{Regression} has the same goal of ``labeling'' features, but not categorically, and instead with real numbers.
+\textbf{Regression} has the same goal of ``labeling'' features, but not categorically, and instead with real numbers. Regression is a supervised learning technique used to predict continuous outcomes, such as temperature, price, or age, based on input features. For example, predicting the price of a house based on its size and location is a regression task.
 \[
 y \in \mathbb{R}
 \]
@@ -93,13 +93,14 @@ The purpose of the regularizer is to discourage large weights by adding a penalt
 Gradient descent \cite{goodfellow2016deep} is essentially a use case for calculating derivatives. In supervised Machine Learning (ML) tasks, its purpose is to find global minima (where the derivative is 0) to optimize a model's loss function. %
 
 Here are the names of some notable gradient descent methods:
-\begin{itemize}
-    \item Vanilla
-    \item Stochastic
-    \item Minibatch
-    \item Hessian
-    \item Momentum
-\end{itemize}
+\begin{outline}
+    \1 \textbf{Vanilla} — The basic form of gradient descent where the entire dataset is used to compute the gradient in each iteration. \textit{Use: simple and stable for small datasets.}
+    \1 \textbf{Stochastic} — Uses a single random data point to update the weights in each iteration. \textit{Use: faster updates and more noise, good for large datasets.}
+    \1 \textbf{Minibatch} — Uses a small batch of data points to compute the gradient. \textit{Use: balances stability and speed, commonly used in practice.}
+    \1 \textbf{Hessian} — Refers to second-order optimization using the Hessian matrix of second derivatives. \textit{Use: captures curvature for more accurate updates but is computationally expensive.}
+    \1 \textbf{Momentum} — Accelerates gradient descent by adding a fraction of the previous update to the current one. \textit{Use: helps escape local minima and smoothens convergence.}
+\end{outline}
+
 
 \subsubsection{Learning Rate}
 Gradient descent performance depends heavily on the learning rate, which determines the size of steps taken during optimization. A good starting point is often 0.01 or 0.001:
