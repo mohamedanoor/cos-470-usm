@@ -16,13 +16,13 @@
 
 \textbf{Goal:} Find $\arg\min$ or $\arg\max$ of a function.
 
-\textbf{Loss function:} Typically, we want to minimize it.
+\textbf{Loss function:} We want to minimize it.
 
 Two common methods:
-\begin{itemize}
-    \item \textbf{Exact:} Take derivative and set it equal to zero.
-    \item \textbf{Gradient-based:} Iteratively follow the slope (descent/ascent).
-\end{itemize}
+\begin{outline}
+    \1 \textbf{Exact:} Take derivative and set it equal to zero.
+    \1 \textbf{Gradient-based:} Iteratively follow the slope (descent/ascent).
+\end{outline}
 
 \begin{center}
     \textit{Initial value = seed the generator}
@@ -50,21 +50,18 @@ Two common methods:
 \[
     w_{t+1} = w_t - \gamma \nabla L(w_t)
 \]
-Where:
-\begin{itemize}
-    \item $L(w)$ is the loss function
-    \item $\gamma$ is the learning rate (hyperparameter, tunable via cross-validation)
-\end{itemize}
+Where $L(w)$ is the loss function and $\gamma$ is the learning rate (hyperparameter, tunable via cross-validation).
 
 \vspace{1em}
 \textbf{Common issues:}
-\begin{itemize}
-    \item Can get stuck at a local minimum
-    \item Vanishing gradient (especially with deep networks)
-    \item Increasing learning rate may help escape minima, but too large a rate causes overshooting
-\end{itemize}
+\begin{outline}
+    \1 Can get stuck at a local minimum
+    \1 Vanishing gradient (especially with deep networks)
+    \1 Increasing learning rate may help escape minima, but too large a rate causes overshooting
+\end{outline}
 
 \section{Momentum}
+
 
 \textbf{Intuition:}
 \[
@@ -100,3 +97,14 @@ Where:
 \]
 
 \textbf{Key Insight:} Look ahead using $\delta v_{t+1}$ to estimate the gradient at the next position.
+\underline{Intuitive: } $w_{t+1}=w_t-\gamma \nabla L(w_t) + \text{(past gradients)}$\\
+\underline{Actual: }\boxed{v_0=0}\\ \boxed{v_{t+1}=\xi v_t + \nabla L(w_t)}
+\boxed{w_{t+1}=w_t-\gamma v_{t+1}}\\
+\underline{issue: } can move past desired point because of momentum of past gradients\\
+\underline{evaluating performance: } \fbox{Count number of iterations}\\
+
+\section{Gradient-Based Nesterov}
+\boxed{v_0=0}\\
+\boxed{v_{t+1}=\xi v_t + \nabla L(w_t)}
+\boxed{w_{t+1}=w_t-\gamma (\delta v_{t+1} + \nabla L(w_t))}\\
+look ahead : $\delta v_{t+1}$
