@@ -2,23 +2,39 @@
 % SUMMARY    : KNN, Regression, Scale Data and Classifier Function 
 %            : University of Southern Maine 
 %            : @james.quinlan
-%            : Deiby Wu - Lecture 4
+%            : Deiby Wu - Lecture 4 ---> Updates by Mohamed Noor
 %+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+\documentclass[12pt]{article}
+\usepackage{amsmath, amssymb}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{geometry}
+\usepackage{minted}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{xcolor}
+\geometry{margin=1in}
+
+
+\begin{document}
+
 \section*{Objectives}
-\begin{outline}
-    \1 K-Nearest Neighbors (KNN)
-    \1 Regression
-    \1 Scale Data
-    \1 Outline for KNN algorithm
-    \1 Classifier Function
-    \1 Class Code
-    \1 XPLs
-\end{outline}
+\begin{enumerate}
+    \item  K-Nearest Neighbors (KNN)
+    \item Regression
+    \item Scale Data
+    \item ``Homework" Problems
+    \item Outline for KNN algorithm
+    \item Classifier Function
+    \item Class Code 
+\end{enumerate}
+ 
 
 \rule[0.0051in]{\textwidth}{0.00025in}
 % ----------------------------------------------------------------
 
-\section{K-Nearest Neighbors (KNN)\cite{guo2003knn}}
+\section{K-Nearest Neighbors (KNN)}
 
 \textbf{KNN} is an algorithm that can be use for Regression and Classification tasks. Its function is to classify new data points
 by checking what is nearby them as its names indicate.
@@ -26,11 +42,20 @@ by checking what is nearby them as its names indicate.
 This is how the data looks:\\
 $Data = \{(x_1, y_1), (x_2, y_2), \dots, (x_n, y_n)\}$
 
-where $x \in \mathbb{R}^p$
+where:
+\begin{itemize}
+    \item $x_i \in \mathbb{R}^p$ represents a feature vector with $p$ dimensions
+    \item $y_i$ represents the target variable (class label or value)
+    \item $n$ is the total number of training examples
+\end{itemize}
 
-Each $(x,y)$ pair is made of $x$: the features, and $y$: the label.
+Each $(x_i, y_i)$ pair consists of:
+\begin{itemize}
+    \item $x_i$: the feature vector containing $p$ attributes
+    \item $y_i$: the label or target value
+\end{itemize}
 
-In the classification case, $y$ is a discrete label, and in the regression case, $y$ is a real number.
+In the classification case, $y_i$ is a discrete label (such as a category or class), and in the regression case, $y_i$ is a real number.
 
 % -----------------------------------------------------------------------------------------------
 
@@ -67,15 +92,29 @@ of a city in New Hampshire.
 
 \begin{center}
     \begin{tikzpicture}
-        \draw[thick] plot[smooth cycle, tension=0.9] coordinates {
-            (0,0) (2.4,0.4) (3.6,1.2) (4,2.8) (3,4) (1.6,4.6) 
-            (0,4) (-1.4,3) (-2,1.6) (-1,0.4)
+        \draw[thick] plot[smooth cycle, tension=0.8] coordinates {
+            (-2,1) (-1.8,0.2) (-0.5,0) (0.7,-0.3) (2,-0.4) (3.2,-0.2) 
+            (4,0.5) (4.2,1.8) (3.5,2.8) (2.5,3) (1.5,3.2) (0,3) (-1,2)
         };
-
-        \fill (2.4, 3.4) circle (0.1);
-        \fill (2.8, 3.6) circle (0.1);
-        \fill (3.1, 3.3) circle (0.1);
-
+        
+        % Add recognizable coastlines
+        \draw[blue, thin] (-2,1) -- (-1.8,0.2) -- (-0.5,0) -- (0.7,-0.3) -- (2,-0.4) -- (3.2,-0.2) -- (4,0.5);
+        \draw[blue, thin] (-2,1) -- (-1,2) -- (0,3);
+        
+        % Label the map
+        \node at (1,-0.7) {\small United States};
+        
+        % Northeast region highlight
+        \draw[red, dashed] (3,2) circle (0.8);
+        \node at (3,2.8) {\small Northeast};
+        
+        % Mark New Hampshire specifically
+        \fill[red] (3.2, 2.2) circle (0.08) node[right] {\scriptsize NH};
+        
+        % Mark neighboring cities/states
+        \fill[blue] (3, 2.4) circle (0.07) node[left] {\scriptsize VT};
+        \fill[blue] (3.4, 2.0) circle (0.07) node[right] {\scriptsize ME};
+        \fill[blue] (3.1, 1.8) circle (0.07) node[below] {\scriptsize MA};
     \end{tikzpicture}
 \end{center}
 
@@ -168,8 +207,8 @@ models to compare the data impact on the result. For example, when dealing with 
 is always necessary to scale this type of data.
 
 \subsection{Scaling Techniques}
-\begin{outline}[enumerate]
-\1 \textbf{Standarize}
+\begin{enumerate}
+   \item  \textbf{Standardize}
 
 \[
 x_i^{\prime} = \frac{x_i - \bar{x}}{\sigma} = Z
@@ -195,11 +234,11 @@ x_i &= \begin{bmatrix}
         \end{bmatrix} \\
 \end{align*}
 
-For this standarize formula, we subtract the mean of the entire column, ($\bar{x}$), from each of the original values, ($x_i$), and divide that difference by the standard deviation ($\sigma$), to get the
+For this standardize formula, we subtract the mean of the entire column, ($\bar{x}$), from each of the original values, ($x_i$), and divide that difference by the standard deviation ($\sigma$), to get the
 Z-score for that value ($x_i$). This is one way of scaling data.
 
 
-\1 \textbf{Normalize (min max scaler)}
+\item  \textbf{Normalize (min max scaler)}
 
 For this scaling technique, we take the values of $x$, and then map them to the interval from $0$ to $1$:
 
@@ -243,26 +282,35 @@ For example, we have values that ranges from $2$ to $10$, then we would want to 
 As we can see in the graph, we mapped $2$ to $0$, and $10$ to $1$, and they can be denoted by the solid lines,
 while the dashed lines represent a number in between $2$ and $10$ that connects to a value in between $0$ and $1$.
 
-\end{outline}
+\end{enumerate}
+
+\section{Exploration (XPL) Problems}
+\begin{enumerate}
+    \item  Code the Standardize Scaler formula. \\
+
+    \item   Write down the formula for linear transformation, and then code it. e.g.$[2,10]$ $\rightarrow$ $[0,1]$ and anything in between.\\
+
+    \item  Write a linear transformation that maps $[a,b]$ to $[c,d]$ (draw a line for them). \\
+
+\end{enumerate}
 
 % -----------------------------------------------------------------------------------------------
 
 \section{Outline for the KNN algorithm}
-\begin{outline}
+\begin{enumerate}
+    \item Given a dataset: $D=\{x_i,y_i\}$
 
-    \1  Given a dataset: $D=\{x_i,y_i\}$
+    \item   Compute the distance from new point $x_t$ that is not in the set $D$, to every $x_i$
 
-    \1  Compute the distance from new point $x_t$ that is not in the set $D$, to every $x_i$
+    \item   Sort distances
 
-    \1  Sort distances
+    \item   Select first $K$ of the sorted distances
 
-    \1  Select first $K$ of the sorted distances
-
-    \1  If \textbf{Classification} problem, take the mode of labels $y_1, y_2, y_3 ... y_k$, else, for \textbf{Regression}
+    \item   If \textbf{Classification} problem, take the mode of labels $y_1, y_2, y_3 ... y_k$, else, for \textbf{Regression}
         problem, take the mean of labels $y \in \mathbb{R} \rightarrow y_1, y_2, y_3 ... y_k$ (as an alternative, using median could be
         ideal in some cases since it ignore outliers)
 
-\end{outline}
+\end{enumerate}
 
 $x_t$ is a test point\\
 
@@ -520,15 +568,4 @@ c = unique(y)
 # Find the most frequent class label in y (this is mode technically)
 c[argmax(map(i -> sum(y .== c[i]), 1:lastindex(c)))]
 \end{minted}
-
-\section{Explorations}
-\begin{outline}
-    \1  Code the Standardize Scaler formula. \\
-    \1  Write down the formula for linear transformation, and then code it. e.g.$[2,10]$ $\rightarrow$ $[0,1]$ and anything in between.\\
-    \1 Write a linear transformation that maps $[a,b]$ to $[c,d]$ (draw a line for them). \\
-    
-
-\end{outline}
-
-\bibliographystyle{plain}
-\bibliography{references}
+\end{document}
